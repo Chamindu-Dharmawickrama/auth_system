@@ -3,18 +3,29 @@
     "version": "1.0.0",
     "description": "Secure full-stack authentication backend — JWT access/refresh token architecture with Prisma + Neon PostgreSQL",
     "type": "module",
-    "main": "server.js",
+    "main": "src/server.js",
     "scripts": {
-        "dev": "nodemon server.js",
+        "start": "node --import tsx/esm src/server.js",
+        "dev": "nodemon --exec \"node --import tsx/esm\" src/server.js",
         "test": "echo \"Error: no test specified\" && exit 1"
     },
     "keywords": [],
     "author": "",
     "license": "ISC",
     "dependencies": {
-        "express": "^5.2.1"
+        "@prisma/adapter-pg": "^7.9.1",
+        "@prisma/client": "^7.9.1",
+        "compression": "^1.8.1",
+        "cors": "^2.8.5",
+        "dotenv": "^16.4.5",
+        "express": "^5.2.1",
+        "helmet": "^7.1.0",
+        "ioredis": "^5.11.1",
+        "pg": "^8.22.0"
     },
     "devDependencies": {
-        "nodemon": "^3.1.14"
+        "nodemon": "^3.1.14",
+        "prisma": "^7.9.1",
+        "tsx": "^4.23.1"
     }
 }
