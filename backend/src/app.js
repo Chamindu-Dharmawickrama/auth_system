@@ -1,4 +1,3 @@
-import crypto from "node:crypto";
 import express from "express";
 import helmet from "helmet";
 import cors from "cors";
@@ -7,6 +6,10 @@ import { config } from "./config/env.js";
 import { isDatabaseHealthy } from "./config/database.js";
 import { logger } from "./config/logger.js";
 import { isRedisHealthy } from "./config/redis.js";
+import { requestId } from "./middlewares/requestId.js";
+import { errorHandler } from "./middlewares/errorHandler.js";
+import { AppError } from "./utils/appError.js";
+import { sendSuccess } from "./utils/apiResponse.js";
 
 const app = express();
 
@@ -15,11 +18,7 @@ if (config.nodeEnv === "production") {
 }
 
 // Assigns a unique ID to every request for end-to-end tracing across services.
-app.use((req, res, next) => {
-    req.id = req.headers["x-request-id"] || crypto.randomUUID();
-    res.setHeader("X-Request-Id", req.id);
-    next();
-});
+app.use(requestId);
 
 app.use(helmet());
 
@@ -49,7 +48,7 @@ app.use((req, res, next) => {
         logger.http(`${req.method} ${req.originalUrl}`, {
             statusCode: res.statusCode,
             durationMs: Date.now() - start,
-            requestId: req.id,
+            requestId: res.locals.requestId,
             ip: req.ip,
             userAgent: req.get("user-agent"),
         });
@@ -69,7 +68,7 @@ app.get("/health", async (req, res) => {
     const status = allHealthy ? "ok" : "degraded";
     const statusCode = allHealthy ? 200 : 503;
 
-    res.status(statusCode).json({
+    const data = {
         status,
         timestamp: new Date().toISOString(),
         uptime: Math.floor(process.uptime()),
@@ -77,45 +76,17 @@ app.get("/health", async (req, res) => {
             database: dbHealthy ? "connected" : "disconnected",
             redis: redisHealthy ? "connected" : "disconnected",
         },
-    });
+    };
+
+    return sendSuccess(res, { statusCode, message: "Health check completed", data });
 });
 
 // 404 handler
 app.use((req, res) => {
-    res.status(404).json({
-        error: "Not Found",
-        message: `Cannot ${req.method} ${req.originalUrl}`,
-        requestId: req.id,
-    });
+    throw new AppError(`Cannot ${req.method} ${req.originalUrl}`, 404);
 });
 
 // Global Error Handler
-// Security: Never exposes stack traces in production. Distinguishes client
-// errors (4xx → warn level) from server errors (5xx → error level with stack).
-app.use((err, req, res, _next) => {
-    const statusCode = err.statusCode || err.status || 500;
-    const isServerError = statusCode >= 500;
-
-    if (isServerError) {
-        logger.error(`Unhandled error: ${err.message}`, {
-            stack: err.stack,
-            requestId: req.id,
-            method: req.method,
-            url: req.originalUrl,
-        });
-    } else {
-        logger.warn(`Client error: ${err.message}`, {
-            statusCode,
-            requestId: req.id,
-        });
-    }
-
-    res.status(statusCode).json({
-        error: isServerError ? "Internal Server Error" : err.message,
-        // Only expose stack traces in non-production environments for debugging
-        ...(config.nodeEnv !== "production" && { stack: err.stack }),
-        requestId: req.id,
-    });
-});
+app.use(errorHandler);
 
 export default app;
