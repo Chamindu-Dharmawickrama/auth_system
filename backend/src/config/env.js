@@ -64,5 +64,11 @@ export const config = Object.freeze({
         15 * 60 * 1000,
     ),
 
+    accessTokenSecret: process.env.ACCESS_TOKEN_SECRET ?? "",
+    accessTokenExpiry: process.env.ACCESS_TOKEN_EXPIRY ?? "15m",
+    refreshTokenSecret: process.env.REFRESH_TOKEN_SECRET ?? "",
+    refreshTokenExpiry: process.env.REFRESH_TOKEN_EXPIRY ?? "7d",
+    refreshTokenExpiryInMs: parseInteger(process.env.REFRESH_TOKEN_EXPIRY_MS),
+
     logLevel: process.env.LOG_LEVEL ?? (nodeEnv === "production" ? "info" : "debug"),
 });

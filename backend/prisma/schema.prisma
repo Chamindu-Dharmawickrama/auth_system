@@ -14,11 +14,17 @@ enum Role {
 
 // user 
 model User {
-    id        String   @id @default(cuid())
-    username  String   @unique
-    email     String   @unique
-    password  String
-    role      Role     @default(USER)
+    id       String @id @default(cuid())
+    username String @unique
+    email    String @unique
+    password String
+    role     Role   @default(USER)
+
+    isActive Boolean @default(true)
+
+    failedAttempts Int       @default(0)
+    lockedUntil    DateTime?
+
     createdAt DateTime @default(now())
     updatedAt DateTime @updatedAt
 
@@ -31,7 +37,10 @@ model RefreshToken {
     id        String   @id @default(cuid())
     tokenHash String   @unique
     userId    String
+    family    String // UUID grouping all rotations from one login session.
     expiresAt DateTime
+
+    revoked   Boolean  @default(false) // Set to true on logout or token rotation
     createdAt DateTime @default(now())
 
     user User @relation(fields: [userId], references: [id], onDelete: Cascade)

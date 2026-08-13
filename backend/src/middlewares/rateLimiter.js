@@ -31,17 +31,16 @@ end
 return { allowed, current, ttl, retryMs, remaining }
 `;
 
-// Default rate limit key: client IP address 
+// Default rate limit key: client IP address
 const defaultKeyGenerator = (req) => req.ip;
 
-// Default error message returned in 429 responses 
+// Default error message returned in 429 responses
 const DEFAULT_ERROR_MESSAGE = "Too many requests";
 
 const normalizeKey = (value) => {
     if (value === undefined || value === null) return "";
     return String(value).trim();
 };
-
 
 /**
  * Creates an Express rate limiter middleware using a fixed window algorithm
@@ -79,10 +78,14 @@ export const createRateLimiter = (options = {}) => {
         throw new Error("createRateLimiter: 'redis' client is required.");
     }
     if (!Number.isFinite(limit) || limit <= 0) {
-        throw new Error("createRateLimiter: 'limit' must be a positive finite number.");
+        throw new Error(
+            "createRateLimiter: 'limit' must be a positive finite number.",
+        );
     }
     if (!Number.isFinite(windowMs) || windowMs <= 0) {
-        throw new Error("createRateLimiter: 'windowMs' must be a positive finite number.");
+        throw new Error(
+            "createRateLimiter: 'windowMs' must be a positive finite number.",
+        );
     }
 
     // ── Middleware ──
@@ -108,29 +111,29 @@ export const createRateLimiter = (options = {}) => {
             // EVAL args: (script, numkeys, key, limit, windowMs)
             const result = await redis.eval(
                 FIXED_WINDOW_SCRIPT,
-                1,       // number of KEYS
-                key,     // KEYS[1]
-                limit,   // ARGV[1]
-                windowMs // ARGV[2]
+                1, // number of KEYS
+                key, // KEYS[1]
+                limit, // ARGV[1]
+                windowMs, // ARGV[2]
             );
 
             const [allowedRaw, , ttlRaw, retryMsRaw, remainingRaw] = result;
 
-            const allowed       = Number(allowedRaw) === 1;
-            const remaining     = Number(remainingRaw);
-            const retryMs       = Number(retryMsRaw);
+            const allowed = Number(allowedRaw) === 1;
+            const remaining = Number(remainingRaw);
+            const retryMs = Number(retryMsRaw);
             const resetAtSeconds = Math.ceil((nowMs + Number(ttlRaw)) / 1000);
 
             // Set standard rate limit headers
-            res.setHeader("X-RateLimit-Limit",     String(limit));
+            res.setHeader("X-RateLimit-Limit", String(limit));
             res.setHeader("X-RateLimit-Remaining", String(remaining));
-            res.setHeader("X-RateLimit-Reset",     String(resetAtSeconds));
+            res.setHeader("X-RateLimit-Reset", String(resetAtSeconds));
 
             if (!allowed) {
                 res.setHeader("Retry-After", String(Math.ceil(retryMs / 1000)));
 
                 return res.status(429).json({
-                    error:     errorMessage,
+                    error: errorMessage,
                     statusCode: 429,
                     limit,
                     remaining,
@@ -140,7 +143,6 @@ export const createRateLimiter = (options = {}) => {
             }
 
             return next();
-
         } catch (error) {
             // Notify caller of the Redis error (e.g., for metrics/alerting)
             if (typeof onRedisError === "function") {
@@ -149,7 +151,7 @@ export const createRateLimiter = (options = {}) => {
 
             if (fallbackBehavior === "block") {
                 return res.status(429).json({
-                    error:     errorMessage,
+                    error: errorMessage,
                     statusCode: 429,
                     requestId: req.id,
                 });

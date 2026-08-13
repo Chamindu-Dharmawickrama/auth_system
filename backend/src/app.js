@@ -2,6 +2,7 @@ import express from "express";
 import helmet from "helmet";
 import cors from "cors";
 import compression from "compression";
+import cookieParser from "cookie-parser";
 import { config } from "./config/env.js";
 import { isDatabaseHealthy } from "./config/database.js";
 import { logger } from "./config/logger.js";
@@ -10,6 +11,8 @@ import { requestId } from "./middlewares/requestId.js";
 import { errorHandler } from "./middlewares/errorHandler.js";
 import { AppError } from "./utils/appError.js";
 import { sendSuccess } from "./utils/apiResponse.js";
+import router from "./routes/index.js";
+import { authenticateUser } from "./middlewares/authenticate.js";
 
 const app = express();
 
@@ -31,6 +34,9 @@ app.use(
     }),
 );
 
+// Parses Cookie header and populates req.cookies — required for httpOnly refresh token reads.
+app.use(cookieParser())
+
 // Compresses response bodies using gzip/deflate. Reduces bandwidth usage by
 // 60-80% for JSON/text responses. Browsers handle decompression transparently.
 app.use(compression());
@@ -40,7 +46,7 @@ app.use(compression());
 app.use(express.json({ limit: "10kb" }));
 app.use(express.urlencoded({ extended: true, limit: "10kb" }));
 
-// Logs every completed HTTP request 
+// Logs every completed HTTP request
 app.use((req, res, next) => {
     const start = Date.now();
 
@@ -57,8 +63,10 @@ app.use((req, res, next) => {
     next();
 });
 
+app.use("/api", router);
+
 // Health check
-app.get("/health", async (req, res) => {
+app.get("/health", authenticateUser, async (req, res) => {
     const [dbHealthy, redisHealthy] = await Promise.all([
         isDatabaseHealthy(),
         isRedisHealthy(),
@@ -78,7 +86,11 @@ app.get("/health", async (req, res) => {
         },
     };
 
-    return sendSuccess(res, { statusCode, message: "Health check completed", data });
+    return sendSuccess(res, {
+        statusCode,
+        message: "Health check completed",
+        data,
+    });
 });
 
 // 404 handler
