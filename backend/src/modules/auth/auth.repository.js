@@ -38,6 +38,9 @@ export const findUserForLogin = async (username) => {
             username: true,
             email: true,
             role: true,
+            isActive: true,
+            failedAttempts: true,
+            lockedUntil: true,
             password: true,
             createdAt: true,
             updatedAt: true,
@@ -103,4 +106,87 @@ export const revokeAllUserRefreshTokens = async (userId) => {
     });
 };
 
+// lock the user (increaments failed attempts and lock user until some time)
+export const lockUserUntil = async (userId, lockedUntil) => {
+    const db = getPrisma();
+    return db.user.update({
+        where: { id: userId },
+        data: { lockedUntil, failedAttempts: 0 },
+    });
+};
 
+// Increment failed attempts for a user
+export const incrementFailedAttempts = async (userId) => {
+    const db = getPrisma();
+    return db.user.update({
+        where: { id: userId },
+        data: { failedAttempts: { increment: 1 } },
+    });
+};
+
+// reset login tracking (failed attempts and locked until)
+export const resetLoginTracking = async (userId) => {
+    const db = getPrisma();
+    return db.user.update({
+        where: { id: userId },
+        data: { failedAttempts: 0, lockedUntil: null },
+    });
+};
+
+// find user by email
+export const findUserByEmail = async (email) => {
+    const db = getPrisma();
+    return db.user.findUnique({
+        where: { email },
+        select: { id: true, email: true, isActive: true },
+    });
+};
+
+// invalidate all the tokens of a user (for password reset)
+export const invalidateUserPasswordResets = async (userId) => {
+    const db = getPrisma();
+    return db.passwordReset.updateMany({
+        where: { userId, used: false },
+        data: { used: true },
+    });
+};
+
+// store the password reset token
+export const createPasswordReset = async (userId, tokenHash, expiresAt) => {
+    const db = getPrisma();
+    return db.passwordReset.create({
+        data: { userId, tokenHash, expiresAt },
+    });
+};
+
+// find password reset token
+export const findPasswordReset = async (tokenHash) => {
+    const db = getPrisma();
+    return db.passwordReset.findUnique({
+        where: { tokenHash },
+        select: {
+            id: true,
+            userId: true,
+            expiresAt: true,
+            used: true,
+        },
+    });
+};
+
+// mark password reset token used
+export const markPasswordResetUsed = async (id) => {
+    const db = getPrisma();
+    return db.passwordReset.update({
+        where: { id },
+        data: { used: true },
+    });
+};
+
+// update the user password
+export const updateUserPassword = async (userId, hashedPassword) => {
+    const db = getPrisma();
+    return db.user.update({
+        where: { id: userId },
+        data: { password: hashedPassword },
+    });
+};

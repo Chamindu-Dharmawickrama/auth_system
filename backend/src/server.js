@@ -3,6 +3,7 @@ import { config } from "./config/env.js";
 import { connectDatabase, disconnectDatabase } from "./config/database.js";
 import { disconnectRedis } from "./config/redis.js";
 import { logger } from "./config/logger.js";
+import { startCleanupJob } from "./jobs/cleanupExpiredTokens.js";
 
 let server = null;
 let isShuttingDown = false;
@@ -11,6 +12,9 @@ let isShuttingDown = false;
 const startServer = async () => {
     // Confirm DB is reachable.
     await connectDatabase();
+
+    // Start token cleanup job
+    startCleanupJob();
 
     server = app.listen(config.port, () => {
         logger.info(`Server started on http://localhost:${config.port}`, {

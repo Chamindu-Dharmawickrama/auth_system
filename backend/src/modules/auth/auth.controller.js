@@ -1,5 +1,5 @@
 import { sendSuccess } from "../../utils/apiResponse.js";
-import { loginService, logoutAllService, logoutService, refreshTokenService, registerService } from "./auth.service.js";
+import { forgotPasswordService, loginService, logoutAllService, logoutService, refreshTokenService, registerService, resetPasswordService } from "./auth.service.js";
 import { config } from "../../config/env.js";
 import { AppError } from "../../utils/appError.js";
 
@@ -61,7 +61,7 @@ export const refreshController = async (req, res) => {
         throw new AppError("Forbidden", 403);
     }
 
-    const rawToken = req.cookies?.refreshToken;
+    const rawToken = req.cookies?.[COOKIE_NAME];
 
     if (!rawToken) {
         throw new AppError("No refresh token provided.", 401);
@@ -140,4 +140,31 @@ export const logoutAllController = async (req, res) => {
         data: null,
     });
 };
+
+
+export const forgotPasswordController = async (req, res) => {
+    const { email } = req.body;
+
+    await forgotPasswordService({ email });
+
+    return sendSuccess(res, {
+        statusCode: 200,
+        message: 'If an account with that email address exists, a password reset link has been sent.',
+        data: null,
+    });
+};
+
+
+export const resetPasswordController = async (req, res) => {
+    const { token, newPassword } = req.body;
+
+    await resetPasswordService({ token, newPassword });
+
+    return sendSuccess(res, {
+        statusCode: 200,
+        message: 'Password reset successfully. Please log in with your new password.',
+        data: null,
+    });
+};
+
 

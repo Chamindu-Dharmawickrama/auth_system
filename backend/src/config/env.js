@@ -68,7 +68,14 @@ export const config = Object.freeze({
     accessTokenExpiry: process.env.ACCESS_TOKEN_EXPIRY ?? "15m",
     refreshTokenSecret: process.env.REFRESH_TOKEN_SECRET ?? "",
     refreshTokenExpiry: process.env.REFRESH_TOKEN_EXPIRY ?? "7d",
-    refreshTokenExpiryInMs: parseInteger(process.env.REFRESH_TOKEN_EXPIRY_MS),
+    refreshTokenExpiryInMs: parseInteger(process.env.REFRESH_TOKEN_EXPIRY_MS, 7 * 24 * 60 * 60 * 1000),
+
+    maxLoginAttempts: parseInteger(process.env.MAX_LOGIN_ATTEMPTS, 3),
+    lockoutDurationMs: parseInteger(process.env.LOCKOUT_DURATION_MS, 15 * 60 * 1000),
+
+    // 15 * 60 * 1000 = 1.5min 
+    passwordResetExpiryInMs: parseInteger(process.env.PASSWORD_RESET_EXPIRY_MS, 900000),
+
 
     logLevel: process.env.LOG_LEVEL ?? (nodeEnv === "production" ? "info" : "debug"),
 });

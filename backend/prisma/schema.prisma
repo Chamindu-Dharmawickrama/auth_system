@@ -29,6 +29,7 @@ model User {
     updatedAt DateTime @updatedAt
 
     refreshTokens RefreshToken[]
+    passwordResets PasswordReset[]
     notes         Note[]
 }
 
@@ -56,6 +57,20 @@ model Note {
     userId    String
     createdAt DateTime @default(now())
     updatedAt DateTime @updatedAt
+
+    user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+    @@index([userId])
+}
+
+// Password Reset
+model PasswordReset {
+    id        String   @id @default(cuid())
+    userId    String
+    tokenHash String   @unique // SHA-256 hash of the raw reset token
+    expiresAt DateTime
+    used      Boolean  @default(false) // One-time use enforcement
+    createdAt DateTime @default(now())
 
     user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
