@@ -1,6 +1,9 @@
 -- CreateEnum
 CREATE TYPE "Role" AS ENUM ('USER', 'ADMIN');
 
+-- CreateEnum
+CREATE TYPE "EmailJobStatus" AS ENUM ('PENDING', 'PROCESSING', 'SENT', 'FAILED');
+
 -- CreateTable
 CREATE TABLE "User" (
     "id" TEXT NOT NULL,
@@ -54,6 +57,24 @@ CREATE TABLE "PasswordReset" (
     CONSTRAINT "PasswordReset_pkey" PRIMARY KEY ("id")
 );
 
+-- CreateTable
+CREATE TABLE "EmailJob" (
+    "id" TEXT NOT NULL,
+    "type" TEXT NOT NULL,
+    "recipient" TEXT NOT NULL,
+    "payload" JSONB NOT NULL,
+    "status" "EmailJobStatus" NOT NULL DEFAULT 'PENDING',
+    "attempts" INTEGER NOT NULL DEFAULT 0,
+    "lastError" TEXT,
+    "providerId" TEXT,
+    "lockedAt" TIMESTAMP(3),
+    "nextAttemptAt" TIMESTAMP(3),
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "EmailJob_pkey" PRIMARY KEY ("id")
+);
+
 -- CreateIndex
 CREATE UNIQUE INDEX "User_username_key" ON "User"("username");
 
@@ -74,6 +95,9 @@ CREATE UNIQUE INDEX "PasswordReset_tokenHash_key" ON "PasswordReset"("tokenHash"
 
 -- CreateIndex
 CREATE INDEX "PasswordReset_userId_idx" ON "PasswordReset"("userId");
+
+-- CreateIndex
+CREATE INDEX "EmailJob_status_nextAttemptAt_createdAt_idx" ON "EmailJob"("status", "nextAttemptAt", "createdAt");
 
 -- AddForeignKey
 ALTER TABLE "RefreshToken" ADD CONSTRAINT "RefreshToken_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
