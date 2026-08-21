@@ -1,5 +1,5 @@
 import { AppError } from "../../utils/appError.js";
-import { findUser, findUserForLogin, createUser, storeRefreshToken, findRefreshToken, revokeRefreshTokenFamily, revokeRefreshToken, revokeAllUserRefreshTokens, lockUserUntil, incrementFailedAttempts, resetLoginTracking, invalidateUserPasswordResets, createPasswordReset, findPasswordReset, markPasswordResetUsed, updateUserPassword, findUserByEmail } from "./auth.repository.js";
+import { findUser, findUserForLogin, createUser, storeRefreshToken, findRefreshToken, revokeRefreshTokenFamily, revokeRefreshToken, revokeAllUserRefreshTokens, lockUserUntil, incrementFailedAttempts, resetLoginTracking, invalidateUserPasswordResets, createPasswordReset, findPasswordReset, markPasswordResetUsed, updateUserPassword, findUserByEmail, createUserTx, invalidateUserPasswordResetsTx, createPasswordResetTx } from "./auth.repository.js";
 import { toLoginResponseDTO, toRefreshResponseDTO, toRegistrationResponseDTO } from "./auth.dto.js";
 import bcrypt from "bcrypt";
 import crypto from 'crypto';
@@ -7,6 +7,8 @@ import { v4 as uuidv4 } from 'uuid';
 import { decodeToken, hashRefreshToken, signAccessToken, signRefreshToken, verifyRefreshToken } from "../../utils/tokens.js";
 import { config } from "../../config/env.js";
 import { addToBlocklist, setUserInvalidateBefore } from "../../utils/tokenBlocklist.js";
+import { getPrisma } from "../../config/database.js";
+import { sendPasswordReset, sendRegistrationConfirmation } from "../email/email.service.js";
 
 const DUMMY_HASH = '$2b$12$IgJ8jdQ5K5KmOFb1JXfkXOo2qKFQxB1e5c.L9Kn8dGdRsWQyVhDOq';
 const MAX_FAILED_ATTEMPTS = config.maxLoginAttempts;
@@ -82,7 +84,17 @@ export const registerService = async ({ username, email, password }) => {
     const SALT_ROUNDS = 12;
     const hashedPassword = await bcrypt.hash(password, SALT_ROUNDS);
 
-    const user = await createUser({ username, email, password: hashedPassword });
+    // Write the user row AND the email outbox job in a single transaction
+    /* If any function inside the transaction fails and throws an error, Prisma rolls back the entire $transaction, 
+       so none of the operations are saved to the database.    */
+    const db = getPrisma();
+    const user = await db.$transaction(async (tx) => {
+        // create a new user
+        const newUser = await createUserTx(tx, { username, email, password: hashedPassword });
+        // create the email job in the database
+        await sendRegistrationConfirmation(newUser, tx)
+        return newUser
+    })
 
     return toRegistrationResponseDTO(user);
 };
@@ -181,21 +193,22 @@ export const forgotPasswordService = async ({ email }) => {
     const user = await findUserByEmail(email);
     if (!user) return;
 
-    // Only one active reset token per user at a time
-    await invalidateUserPasswordResets(user.id);
-
     const rawToken = crypto.randomBytes(32).toString('hex');
     const tokenHash = hashRefreshToken(rawToken);
     const expiresAt = new Date(Date.now() + config.passwordResetExpiryInMs);
 
-    await createPasswordReset(user.id, tokenHash, expiresAt);
-
     // create a reset url with the raw token
     const resetUrl = `${config.allowedOrigins[0]}/reset-password?token=${rawToken}`;
 
-    // TODO: send email with reset url
-
-    console.log("[PASSWORD RESET URL]: ", resetUrl);
+    const db = getPrisma();
+    await db.$transaction(async (tx) => {
+        // Invalidate any previous active reset tokens for this user
+        await invalidateUserPasswordResetsTx(tx, user.id);
+        // store the new reset token
+        await createPasswordResetTx(tx, user.id, tokenHash, expiresAt);
+        // create the email job in the database
+        await sendPasswordReset(user, resetUrl, tx);
+    });
 }
 
 

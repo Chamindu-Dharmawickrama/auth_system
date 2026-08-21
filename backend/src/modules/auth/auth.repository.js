@@ -28,6 +28,17 @@ export const createUser = async ({ username, email, password }) => {
     })
 }
 
+// create user inside a transaction
+export const createUserTx = (tx, { username, email, password }) => {
+    return tx.user.create({
+        data: {
+            username,
+            email,
+            password,
+        },
+    })
+}
+
 // find user by username for login
 export const findUserForLogin = async (username) => {
     const db = getPrisma();
@@ -138,7 +149,7 @@ export const findUserByEmail = async (email) => {
     const db = getPrisma();
     return db.user.findUnique({
         where: { email },
-        select: { id: true, email: true, isActive: true },
+        select: { id: true, username: true, email: true, isActive: true },
     });
 };
 
@@ -151,10 +162,25 @@ export const invalidateUserPasswordResets = async (userId) => {
     });
 };
 
+// invalidate all the tokens of a user (for password reset) inside a transaction
+export const invalidateUserPasswordResetsTx = (tx, userId) => {
+    return tx.passwordReset.updateMany({
+        where: { userId, used: false },
+        data: { used: true },
+    });
+};
+
 // store the password reset token
 export const createPasswordReset = async (userId, tokenHash, expiresAt) => {
     const db = getPrisma();
     return db.passwordReset.create({
+        data: { userId, tokenHash, expiresAt },
+    });
+};
+
+// create password reset token inside a transaction
+export const createPasswordResetTx = (tx, userId, tokenHash, expiresAt) => {
+    return tx.passwordReset.create({
         data: { userId, tokenHash, expiresAt },
     });
 };

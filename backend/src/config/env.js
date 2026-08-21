@@ -32,7 +32,6 @@ const nodeEnv = process.env.NODE_ENV ?? "development";
 if (nodeEnv === "production") {
     const requiredKeys = [
         "DATABASE_URL",
-        "JWT_SECRET",
         "ALLOWED_ORIGINS",
         "REDIS_URL",
     ];
@@ -75,6 +74,23 @@ export const config = Object.freeze({
 
     // 15 * 60 * 1000 = 1.5min 
     passwordResetExpiryInMs: parseInteger(process.env.PASSWORD_RESET_EXPIRY_MS, 900000),
+
+    emailProvider: process.env.EMAIL_PROVIDER ?? 'console',
+    emailFromAddress: process.env.EMAIL_FROM_ADDRESS ?? 'noreply@example.com',
+    emailFromName: process.env.EMAIL_FROM_NAME ?? 'Auth System',
+
+    smtpHost: process.env.SMTP_HOST ?? '',
+    smtpPort: parseInteger(process.env.SMTP_PORT, 587),
+    smtpSecure: parseBoolean(process.env.SMTP_SECURE, false),
+    smtpUser: process.env.SMTP_USER ?? '',
+    smtpPass: process.env.SMTP_PASS ?? '',
+
+    emailWorkerPollMs: parseInteger(process.env.EMAIL_WORKER_POLL_MS, 5_000), // 5 seconds
+    emailWorkerMaxAttempts: parseInteger(process.env.EMAIL_WORKER_MAX_ATTEMPTS, 5),
+    emailWorkerStuckJobTimeoutMs: parseInteger(
+        process.env.EMAIL_WORKER_STUCK_JOB_TIMEOUT_MS,
+        5 * 60 * 1000,  // 5 minutes
+    ),
 
 
     logLevel: process.env.LOG_LEVEL ?? (nodeEnv === "production" ? "info" : "debug"),

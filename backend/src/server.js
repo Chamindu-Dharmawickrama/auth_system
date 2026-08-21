@@ -4,6 +4,7 @@ import { connectDatabase, disconnectDatabase } from "./config/database.js";
 import { disconnectRedis } from "./config/redis.js";
 import { logger } from "./config/logger.js";
 import { startCleanupJob } from "./jobs/cleanupExpiredTokens.js";
+import { startEmailWorker } from "./modules/email/email.worker.js";
 
 let server = null;
 let isShuttingDown = false;
@@ -15,6 +16,9 @@ const startServer = async () => {
 
     // Start token cleanup job
     startCleanupJob();
+
+    // Start transactional email worker (Queue system)
+    startEmailWorker();
 
     server = app.listen(config.port, () => {
         logger.info(`Server started on http://localhost:${config.port}`, {
