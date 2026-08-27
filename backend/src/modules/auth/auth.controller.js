@@ -1,5 +1,5 @@
 import { sendSuccess } from "../../utils/apiResponse.js";
-import { forgotPasswordService, loginService, logoutAllService, logoutService, refreshTokenService, registerService, resetPasswordService } from "./auth.service.js";
+import { forgotPasswordService, googleSignInService, loginService, logoutAllService, logoutService, refreshTokenService, registerService, resetPasswordService } from "./auth.service.js";
 import { config } from "../../config/env.js";
 import { AppError } from "../../utils/appError.js";
 
@@ -164,6 +164,23 @@ export const resetPasswordController = async (req, res) => {
         statusCode: 200,
         message: 'Password reset successfully. Please log in with your new password.',
         data: null,
+    });
+};
+
+
+export const googleSignInController = async (req, res) => {
+    const { idToken } = req.body;
+
+    const result = await googleSignInService({ idToken });
+
+    res.cookie(COOKIE_NAME, result.refreshToken, COOKIE_OPTIONS);
+
+    const { refreshToken, ...safeResult } = result;
+
+    return sendSuccess(res, {
+        statusCode: 200,
+        message: 'Google sign-in successful.',
+        data: safeResult,
     });
 };
 

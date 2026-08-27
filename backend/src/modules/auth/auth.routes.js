@@ -3,9 +3,9 @@ import redis from "../../config/redis.js";
 import { createRateLimiter } from "../../middlewares/rateLimiter.js";
 import logger from "../../config/logger.js";
 import { validate } from "../../middlewares/validate.js";
-import { forgotPasswordSchema, loginSchema, registerSchema, resetPasswordSchema } from "./auth.validator.js";
+import { forgotPasswordSchema, googleSignInSchema, loginSchema, registerSchema, resetPasswordSchema } from "./auth.validator.js";
 import { catchAsync } from "../../utils/catchAsync.js";
-import { forgotPasswordController, loginController, logoutAllController, logoutController, refreshController, registerController, resetPasswordController } from "./auth.controller.js";
+import { forgotPasswordController, googleSignInController, loginController, logoutAllController, logoutController, refreshController, registerController, resetPasswordController } from "./auth.controller.js";
 import { authenticateUser } from "../../middlewares/authenticate.js";
 
 const authRouter = Router();
@@ -97,9 +97,9 @@ const logoutAllLimiter = createRateLimiter({
 
 const forgotPasswordLimiter = createRateLimiter({
     redis,
-    limit:        3,
-    windowMs:     15 * 60 * 1000,
-    prefix:       'forgot-pw',
+    limit: 3,
+    windowMs: 15 * 60 * 1000,
+    prefix: 'forgot-pw',
     errorMessage: 'Too many password reset requests. Please try again later.',
     keyGenerator: (req) => req.body?.email ?? req.ip,
     fallbackBehavior: 'block',
@@ -109,14 +109,26 @@ const forgotPasswordLimiter = createRateLimiter({
 
 const resetPasswordLimiter = createRateLimiter({
     redis,
-    limit:        5,
-    windowMs:     15 * 60 * 1000,
-    prefix:       'reset-pw',
+    limit: 5,
+    windowMs: 15 * 60 * 1000,
+    prefix: 'reset-pw',
     errorMessage: 'Too many password reset attempts. Please try again later.',
     keyGenerator: (req) => req.ip,
     fallbackBehavior: 'block',
     onRedisError: (error) =>
         logger.warn('Reset-password rate limiter Redis error — blocking for safety', { message: error.message }),
+});
+
+const googleSignInLimiter = createRateLimiter({
+    redis,
+    limit: 5,
+    windowMs: 60_000,
+    prefix: 'google-signin',
+    errorMessage: 'Too many Google sign-in attempts. Try again later.',
+    keyGenerator: (req) => req.ip,
+    fallbackBehavior: 'block',
+    onRedisError: (error) =>
+        logger.warn('Google sign-in rate limiter Redis error — blocking for safety', { message: error.message }),
 });
 
 // POST /auth/login
@@ -150,6 +162,13 @@ authRouter.post('/reset-password',
     resetPasswordLimiter,
     validate(resetPasswordSchema),
     catchAsync(resetPasswordController),
+);
+
+// POST /auth/google
+authRouter.post('/google',
+    googleSignInLimiter,
+    validate(googleSignInSchema),
+    catchAsync(googleSignInController),
 );
 
 export default authRouter;

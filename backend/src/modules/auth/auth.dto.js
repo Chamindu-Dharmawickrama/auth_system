@@ -12,6 +12,8 @@ export const toUserDTO = (user) => ({
     username: user.username,
     email: user.email,
     role: user.role,
+    avatarUrl: user.avatarUrl ?? null,
+    authProvider: user.authProvider ?? 'local',
     createdAt: user.createdAt,
     updatedAt: user.updatedAt,
 });

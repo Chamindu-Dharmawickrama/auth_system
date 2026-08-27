@@ -1,5 +1,5 @@
 import { AppError } from "../../utils/appError.js";
-import { findUser, findUserForLogin, createUser, storeRefreshToken, findRefreshToken, revokeRefreshTokenFamily, revokeRefreshToken, revokeAllUserRefreshTokens, lockUserUntil, incrementFailedAttempts, resetLoginTracking, invalidateUserPasswordResets, createPasswordReset, findPasswordReset, markPasswordResetUsed, updateUserPassword, findUserByEmail, createUserTx, invalidateUserPasswordResetsTx, createPasswordResetTx } from "./auth.repository.js";
+import { findUser, findUserForLogin, createUser, storeRefreshToken, findRefreshToken, revokeRefreshTokenFamily, revokeRefreshToken, revokeAllUserRefreshTokens, lockUserUntil, incrementFailedAttempts, resetLoginTracking, invalidateUserPasswordResets, createPasswordReset, findPasswordReset, markPasswordResetUsed, updateUserPassword, findUserByEmail, createUserTx, invalidateUserPasswordResetsTx, createPasswordResetTx, findUserByGoogleId, linkGoogleAccountTx, createGoogleUserTx } from "./auth.repository.js";
 import { toLoginResponseDTO, toRefreshResponseDTO, toRegistrationResponseDTO } from "./auth.dto.js";
 import bcrypt from "bcrypt";
 import crypto from 'crypto';
@@ -9,6 +9,8 @@ import { config } from "../../config/env.js";
 import { addToBlocklist, setUserInvalidateBefore } from "../../utils/tokenBlocklist.js";
 import { getPrisma } from "../../config/database.js";
 import { sendPasswordReset, sendRegistrationConfirmation } from "../email/email.service.js";
+import { OAuth2Client } from 'google-auth-library';
+
 
 const DUMMY_HASH = '$2b$12$IgJ8jdQ5K5KmOFb1JXfkXOo2qKFQxB1e5c.L9Kn8dGdRsWQyVhDOq';
 const MAX_FAILED_ATTEMPTS = config.maxLoginAttempts;
@@ -32,7 +34,8 @@ export const loginService = async ({ username, password }) => {
     const passwordValid = await bcrypt.compare(password, hashToCompare);
 
     if (!user || !passwordValid) {
-        if (user && !passwordValid) {
+        // Only apply rate limiting if the account is local (password-based).
+        if (user && !passwordValid && user.authProvider === 'local') {
             const newFailedAttemptCount = (user?.failedAttempts || 0) + 1;
             if (newFailedAttemptCount > MAX_FAILED_ATTEMPTS) {
                 const lockedUntil = new Date(Date.now() + LOCKOUT_DURATION_MS);
@@ -193,6 +196,8 @@ export const forgotPasswordService = async ({ email }) => {
     const user = await findUserByEmail(email);
     if (!user) return;
 
+    if (user.authProvider === 'google') return;
+
     const rawToken = crypto.randomBytes(32).toString('hex');
     const tokenHash = hashRefreshToken(rawToken);
     const expiresAt = new Date(Date.now() + config.passwordResetExpiryInMs);
@@ -238,8 +243,77 @@ export const resetPasswordService = async ({ token, newPassword }) => {
 
     // immediately invalidate all outstanding access tokens
     await setUserInvalidateBefore(storedReset.userId);
-
 }
+
+
+// google auth 
+const googleClient = new OAuth2Client();
+
+export const googleSignInService = async ({ idToken }) => {
+
+    // verify the google id token
+    let googlePayload;
+    try {
+        const ticket = await googleClient.verifyIdToken({
+            idToken,
+            audience: config.googleClientId,
+        });
+
+        googlePayload = ticket.getPayload();
+    } catch (error) {
+        throw new AppError("Invalid or expired Google ID token.", 401);
+    }
+
+    const { sub: googleId, email, name, picture: avatarUrl } = googlePayload;
+
+    if (!email) {
+        throw new AppError('Google account did not provide an email address.', 400);
+    }
+
+    // Try to find an existing user by their Google ID
+    let user = await findUserByGoogleId(googleId);
+
+    if (!user) {
+        const db = getPrisma();
+
+        // Check if a local account already exists with this email (auto-link).
+        const existingByEmail = await findUserByEmail(email);
+
+        // if email exist linked local account with google account
+        if (existingByEmail) {
+            // authProvider stays 'local' — the user can still log in with their password.
+            user = await db.$transaction(async (tx) => {
+                return linkGoogleAccountTx(tx, existingByEmail.id, { googleId, avatarUrl });
+            })
+        } else {
+            // first-time Google user -> create new user with google account
+            const baseUsername = _deriveUsernameBase(name, email);
+            const username = await _findAvailableUsername(baseUsername);
+
+            // create new user with google account and send welcome email
+            user = await db.$transaction(async (tx) => {
+                const newUser = await createGoogleUserTx(tx, { googleId, email, username, avatarUrl });
+                await sendRegistrationConfirmation(newUser, tx);
+                return newUser;
+            });
+        }
+    }
+
+    if (!user.isActive) {
+        throw new AppError('Your account has been suspended. Please contact support.', 403);
+    }
+
+    const family = uuidv4();
+    const accessToken = signAccessToken(user);
+    const refreshToken = signRefreshToken(user, family);
+
+    const hashedRefreshToken = hashRefreshToken(refreshToken);
+    const expiresAt = new Date(Date.now() + config.refreshTokenExpiryInMs);
+    await storeRefreshToken(user.id, hashedRefreshToken, family, expiresAt);
+
+    return toLoginResponseDTO(user, accessToken, refreshToken);
+};
+
 
 // Add an access token to the Redis blocklist
 async function _blocklistAccessToken(accessToken) {
@@ -253,3 +327,37 @@ async function _blocklistAccessToken(accessToken) {
         throw new AppError("Invalid access token.", 401);
     }
 }
+
+// Use name if available (else email's local-part) as the source, then sanitize it into a lowercase username.
+function _deriveUsernameBase(name, email) {
+    const source = name || email.split('@')[0];
+    return (
+        source
+            .toLowerCase()
+            .replace(/[^a-z0-9]/g, '_')
+            .replace(/_{2,}/g, '_')
+            .replace(/^_+|_+$/g, '')
+            .slice(0, 25)
+        || 'user'
+    );
+}
+
+
+// Checks if `baseUsername` is available; if not, appends a random 4-digit suffix and
+// retries up to 10 times. Falls back to a millisecond-timestamp suffix.
+async function _findAvailableUsername(baseUsername) {
+    const db = getPrisma();
+
+    const taken = await db.user.findUnique({ where: { username: baseUsername }, select: { id: true } });
+    if (!taken) return baseUsername;
+
+    for (let i = 0; i < 10; i++) {
+        const suffix = Math.floor(1000 + Math.random() * 9000);
+        const candidate = `${base}_${suffix}`;
+        const exists = await db.user.findUnique({ where: { username: candidate }, select: { id: true } });
+        if (!exists) return candidate;
+    }
+
+    // Extremely unlikely to reach here, but ensures we never throw.
+    return `${base}_${Date.now().toString().slice(-6)}`;
+} 

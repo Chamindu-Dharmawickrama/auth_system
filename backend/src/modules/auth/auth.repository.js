@@ -50,6 +50,8 @@ export const findUserForLogin = async (username) => {
             email: true,
             role: true,
             isActive: true,
+            authProvider: true,  
+            avatarUrl: true,
             failedAttempts: true,
             lockedUntil: true,
             password: true,
@@ -149,7 +151,7 @@ export const findUserByEmail = async (email) => {
     const db = getPrisma();
     return db.user.findUnique({
         where: { email },
-        select: { id: true, username: true, email: true, isActive: true },
+        select: { id: true, username: true, email: true, isActive: true, authProvider: true },
     });
 };
 
@@ -214,5 +216,60 @@ export const updateUserPassword = async (userId, hashedPassword) => {
     return db.user.update({
         where: { id: userId },
         data: { password: hashedPassword },
+    });
+};
+
+// find user by there google 'sub' (id)
+export const findUserByGoogleId = async (googleId) => {
+    const db = getPrisma();
+    return db.user.findUnique({
+        where: { googleId },
+        select: {
+            id: true,
+            username: true,
+            email: true,
+            role: true,
+            isActive: true,
+            avatarUrl: true,
+            authProvider: true,
+            createdAt: true,
+            updatedAt: true,
+        },
+    });
+};
+
+// if google id doesn't exist and user has same email then update the user's google id and avatar if provided   
+export const linkGoogleAccountTx = (tx, userId, { googleId, avatarUrl }) => {
+    return tx.user.update({
+        where: { id: userId },
+        data: {
+            googleId,
+            // Only set avatarUrl if Google provides one
+            ...(avatarUrl ? { avatarUrl } : {}),
+        },
+        select: {
+            id: true,
+            username: true,
+            email: true,
+            role: true,
+            isActive: true,
+            avatarUrl: true,
+            authProvider: true,
+            createdAt: true,
+            updatedAt: true,
+        },
+    });
+};
+
+// create user with google account
+export const createGoogleUserTx = (tx, { googleId, email, username, avatarUrl }) => {
+    return tx.user.create({
+        data: {
+            googleId,
+            email,
+            username,
+            avatarUrl,
+            authProvider: 'google',
+        },
     });
 };

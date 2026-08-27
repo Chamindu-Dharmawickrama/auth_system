@@ -14,14 +14,14 @@ let prisma = null;
 // log the prisma "query", "info", "warn", "error" in dev environment and only "warn", "error" in production
 export const getPrisma = () => {
     if (!prisma) {
-        
+
         const adapter = new PrismaPg({ connectionString: config.databaseUrl });
 
         prisma = new PrismaClient({
             adapter,
             log:
                 config.nodeEnv === "development"
-                    ? ["query", "info", "warn", "error"]
+                    ? ["info", "warn", "error"]
                     : ["warn", "error"],
         });
     }

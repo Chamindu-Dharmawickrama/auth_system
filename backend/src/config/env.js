@@ -92,6 +92,8 @@ export const config = Object.freeze({
         5 * 60 * 1000,  // 5 minutes
     ),
 
+    googleClientId: process.env.GOOGLE_CLIENT_ID ?? '',
+    googleClientSecret: process.env.GOOGLE_CLIENT_SECRET ?? '',
 
     logLevel: process.env.LOG_LEVEL ?? (nodeEnv === "production" ? "info" : "debug"),
 });
