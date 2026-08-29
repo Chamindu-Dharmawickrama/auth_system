@@ -65,6 +65,7 @@ model Note {
     user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
     @@index([userId])
+    @@unique([userId, title]) // A user cannot have two notes with the same title
 }
 
 // Password Reset

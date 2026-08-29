@@ -9,8 +9,11 @@ CREATE TABLE "User" (
     "id" TEXT NOT NULL,
     "username" TEXT NOT NULL,
     "email" TEXT NOT NULL,
-    "password" TEXT NOT NULL,
+    "password" TEXT,
     "role" "Role" NOT NULL DEFAULT 'USER',
+    "googleId" TEXT,
+    "avatarUrl" TEXT,
+    "authProvider" TEXT NOT NULL DEFAULT 'local',
     "isActive" BOOLEAN NOT NULL DEFAULT true,
     "failedAttempts" INTEGER NOT NULL DEFAULT 0,
     "lockedUntil" TIMESTAMP(3),
@@ -82,6 +85,9 @@ CREATE UNIQUE INDEX "User_username_key" ON "User"("username");
 CREATE UNIQUE INDEX "User_email_key" ON "User"("email");
 
 -- CreateIndex
+CREATE UNIQUE INDEX "User_googleId_key" ON "User"("googleId");
+
+-- CreateIndex
 CREATE UNIQUE INDEX "RefreshToken_tokenHash_key" ON "RefreshToken"("tokenHash");
 
 -- CreateIndex
@@ -89,6 +95,9 @@ CREATE INDEX "RefreshToken_userId_idx" ON "RefreshToken"("userId");
 
 -- CreateIndex
 CREATE INDEX "Note_userId_idx" ON "Note"("userId");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "Note_userId_title_key" ON "Note"("userId", "title");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "PasswordReset_tokenHash_key" ON "PasswordReset"("tokenHash");
