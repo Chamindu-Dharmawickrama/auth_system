@@ -1,0 +1,27 @@
+.input-wrapper {
+  position: relative;
+}
+
+.input-icon {
+  position: absolute;
+  left: var(--space-3);
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--color-text-muted);
+  pointer-events: none;
+}
+
+.input-icon-right {
+  position: absolute;
+  right: var(--space-3);
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--color-text-muted);
+  cursor: pointer;
+  transition: color var(--transition-fast);
+}
+
+.input-icon-right:hover { color: var(--color-text-secondary); }
+
+.input-with-icon { padding-left: var(--space-10); }
+.input-with-icon-right { padding-right: var(--space-10); }
