@@ -11,7 +11,7 @@ import { logout } from "@/features/auth/slices/authSlice";
 // Use RTK queries to send HTTP requests to the backend
 
 // Raw base query  - attach access token, include cookies, include header to indicate the request is coming from our SPA
-const rawBaseQuery = fetchBaseQuery({
+export const rawBaseQuery = fetchBaseQuery({
    baseUrl: (import.meta.env.VITE_API_BASE_URL || "") + "/api",
    prepareHeaders: (headers) => {
       //attach the token from in-memory

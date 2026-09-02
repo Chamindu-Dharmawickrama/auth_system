@@ -44,10 +44,7 @@ export function LoginPage() {
       console.log("onsubmit data:", data);
       try {
          await login(data).unwrap();
-         if (isSuccess) {
-            alert("Login Successfully !");
-         }
-         // navigate(from, { replace: true });
+         navigate(from, { replace: true });
       } catch (error) {}
    };
 
