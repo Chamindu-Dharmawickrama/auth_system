@@ -10,6 +10,31 @@ import { logout } from "@/features/auth/slices/authSlice";
 
 // Use RTK queries to send HTTP requests to the backend
 
+// ---------------------------------------------------------------------------
+// Cache-reset registry
+// ---------------------------------------------------------------------------
+// We cannot import notesApi / profileApi here directly — they import
+// baseQueryWithReauth themselves, which would create a circular module
+// dependency and crash at runtime.
+//
+// Instead, external modules (authApi, profileApi) register a callback once
+// their own module has fully initialised. We call those callbacks lazily at
+// runtime, so there is never an import-time cycle.
+// ---------------------------------------------------------------------------
+type CacheResetFn = (dispatch: AppDispatch) => void;
+const _cacheResetFns: CacheResetFn[] = [];
+
+/** Call this from any API module to register a cache-wipe callback. */
+export function registerCacheReset(fn: CacheResetFn): void {
+   _cacheResetFns.push(fn);
+}
+
+function resetAllCaches(dispatch: AppDispatch): void {
+   _cacheResetFns.forEach((fn) => fn(dispatch));
+}
+
+// ---------------------------------------------------------------------------
+
 // Raw base query  - attach access token, include cookies, include header to indicate the request is coming from our SPA
 export const rawBaseQuery = fetchBaseQuery({
    baseUrl: (import.meta.env.VITE_API_BASE_URL || "") + "/api",
@@ -72,8 +97,11 @@ export const baseQueryWithReauth: BaseQueryFn<
          // retry the original request
          result = await rawBaseQuery(args, api, extraOptions);
       } else {
-         // refresh failed -> logout locally
-         (api.dispatch as AppDispatch)(logout());
+         // refresh failed -> logout locally and wipe ALL cached API data so the
+         // next user never sees this user's stale notes or profile.
+         const d = api.dispatch as AppDispatch;
+         resetAllCaches(d);
+         d(logout());
          // Logout from backend to ensure HTTP-only cookies (like refresh token) are cleared
          await rawBaseQuery(
             { url: "/auth/logout", method: "POST" },

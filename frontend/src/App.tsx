@@ -1,28 +1,18 @@
-import React, { Suspense, useEffect, useRef } from "react";
-import { Route, Routes } from "react-router-dom";
-import { ROUTES } from "./constants/app.constants";
-import { Spinner } from "./shared/components/ui/Spinner";
+import { useEffect, useRef } from "react";
+import { Navigate, Route, Routes } from "react-router-dom";
+import { ROUTES, USER_ROLES } from "./constants/app.constants";
 import { ProtectedRoute } from "./shared/guards/ProtectedRoute";
 import { GuestRoute } from "./shared/guards/GuestRoute";
 import { useAppDispatch } from "./app/hooks";
 import { restoreSession } from "./features/auth/slices/authSlice";
+import { AppShell } from "./shared/components/layouts/AppShell";
 
-// lazy load them to improve the initial load time of the application.
-const LoginPage = React.lazy(() =>
-   import("@/features/auth").then((m) => ({ default: m.LoginPage })),
-);
-const RegisterPage = React.lazy(() =>
-   import("@/features/auth").then((m) => ({ default: m.RegisterPage })),
-);
-const ForgotPasswordPage = React.lazy(() =>
-   import("@/features/auth").then((m) => ({ default: m.ForgotPasswordPage })),
-);
-const ResetPasswordPage = React.lazy(() =>
-   import("@/features/auth").then((m) => ({ default: m.ResetPasswordPage })),
-);
-const NotePage = React.lazy(() =>
-   import("@/features/notes").then((m) => ({ default: m.NotePage })),
-);
+import { LoginPage } from "@/features/auth";
+import { RegisterPage } from "@/features/auth";
+import { ForgotPasswordPage } from "@/features/auth";
+import { ResetPasswordPage } from "@/features/auth";
+import { NotesPage } from "@/features/notes";
+import { ProfilePage } from "@/features/profile";
 
 export default function App() {
    const dispatch = useAppDispatch();
@@ -38,52 +28,76 @@ export default function App() {
    }, [dispatch]);
 
    return (
-      <>
-         <Suspense fallback={<Spinner fullPage message="Loading..xx" />}>
-            <Routes>
-               <Route
-                  path={ROUTES.LOGIN}
-                  element={
-                     <GuestRoute>
-                        <LoginPage />
-                     </GuestRoute>
-                  }
-               />
-               <Route
-                  path={ROUTES.REGISTER}
-                  element={
-                     <GuestRoute>
-                        <RegisterPage />
-                     </GuestRoute>
-                  }
-               />
-               <Route
-                  path={ROUTES.FORGOT_PASSWORD}
-                  element={
-                     <GuestRoute>
-                        <ForgotPasswordPage />
-                     </GuestRoute>
-                  }
-               />
-               <Route
-                  path={ROUTES.RESET_PASSWORD}
-                  element={
-                     <GuestRoute>
-                        <ResetPasswordPage />
-                     </GuestRoute>
-                  }
-               />
+      <Routes>
+         <Route
+            path={ROUTES.LOGIN}
+            element={
+               <GuestRoute>
+                  <LoginPage />
+               </GuestRoute>
+            }
+         />
+         <Route
+            path={ROUTES.REGISTER}
+            element={
+               <GuestRoute>
+                  <RegisterPage />
+               </GuestRoute>
+            }
+         />
+         <Route
+            path={ROUTES.FORGOT_PASSWORD}
+            element={
+               <GuestRoute>
+                  <ForgotPasswordPage />
+               </GuestRoute>
+            }
+         />
+         <Route
+            path={ROUTES.RESET_PASSWORD}
+            element={
+               <GuestRoute>
+                  <ResetPasswordPage />
+               </GuestRoute>
+            }
+         />
 
-               <Route
-                  path={ROUTES.DASHBOARD}
-                  element={
-                     <ProtectedRoute>
-                        <NotePage />
-                     </ProtectedRoute>
-                  }
-               />
-            </Routes>
-         </Suspense>
-      </>
+         <Route
+            path={ROUTES.DASHBOARD}
+            element={
+               <ProtectedRoute>
+                  <AppShell title="My Notes">
+                     <NotesPage />
+                  </AppShell>
+               </ProtectedRoute>
+            }
+         />
+
+         <Route
+            path={ROUTES.ADMIN_NOTES}
+            element={
+               <ProtectedRoute requiredRole={USER_ROLES.ADMIN}>
+                  <AppShell title="All Notes">
+                     <NotesPage adminView />
+                  </AppShell>
+               </ProtectedRoute>
+            }
+         />
+
+         <Route
+            path={ROUTES.PROFILE}
+            element={
+               <ProtectedRoute>
+                  <AppShell title="Profile">
+                     <ProfilePage />
+                  </AppShell>
+               </ProtectedRoute>
+            }
+         />
+
+         {/* Redirect empty path and 404 to dashboard */}
+         <Route path="/" element={<Navigate to={ROUTES.DASHBOARD} replace />} />
+         <Route path="*" element={<Navigate to={ROUTES.DASHBOARD} replace />} />
+      </Routes>
    );
 }

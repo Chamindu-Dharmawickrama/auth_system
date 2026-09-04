@@ -29,7 +29,7 @@ app.use(
     cors({
         origin: config.allowedOrigins,
         credentials: true, // Allow cookies in cross-origin requests (needed for refresh tokens)
-        methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+        methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
         allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With"],
     }),
 );

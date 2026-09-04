@@ -1,89 +1,162 @@
+/* ── Base button ──────────────────────────────────────────────── */
 .btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: var(--space-2);
-  padding: var(--space-3) var(--space-5);
-  border: none;
-  border-radius: var(--radius-md);
-  font-size: var(--text-sm);
-  font-weight: var(--fw-semibold);
-  cursor: pointer;
-  transition: all var(--transition-fast);
-  white-space: nowrap;
-  position: relative;
-  overflow: hidden;
-  text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-2);
+    padding: 0 var(--space-5);
+    border: none;
+    border-radius: var(--radius-md);
+    font-size: var(--text-sm);
+    font-weight: var(--fw-semibold);
+    font-family: var(--font-sans);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    white-space: nowrap;
+    position: relative;
+    overflow: hidden;
+    text-decoration: none;
+    /* Minimum 44px touch target */
+    min-height: var(--touch-target);
+    letter-spacing: -0.01em;
+}
+
+.btn:focus-visible {
+    outline: 2px solid var(--color-border-focus);
+    outline-offset: 3px;
 }
 
 .btn:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-  pointer-events: none;
+    opacity: 0.45;
+    cursor: not-allowed;
+    pointer-events: none;
 }
 
+/* ── Primary ──────────────────────────────────────────────────── */
 .btn-primary {
-  background: linear-gradient(135deg, var(--color-primary), var(--color-accent));
-  color: #fff;
-  box-shadow: 0 4px 12px var(--color-primary-glow);
+    background: linear-gradient(
+        135deg,
+        var(--color-primary) 0%,
+        var(--color-accent) 100%
+    );
+    color: #fff;
+    box-shadow: 0 4px 16px var(--color-primary-glow);
 }
 
 .btn-primary:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 6px 20px var(--color-primary-glow);
-  filter: brightness(1.1);
+    transform: translateY(-1px);
+    box-shadow: 0 8px 28px var(--color-primary-glow);
+    filter: brightness(1.08);
 }
 
-.btn-primary:active { transform: translateY(0); }
+.btn-primary:active {
+    transform: translateY(0);
+    box-shadow: 0 4px 12px var(--color-primary-glow);
+}
 
+/* ── Secondary ────────────────────────────────────────────────── */
 .btn-secondary {
-  background: var(--color-bg-elevated);
-  color: var(--color-text-primary);
-  border: 1px solid var(--color-border);
+    background: var(--color-bg-elevated);
+    color: var(--color-text-primary);
+    border: 1px solid var(--color-border);
 }
 
 .btn-secondary:hover {
-  background: hsl(228, 14%, 18%);
-  border-color: hsl(228, 14%, 30%);
+    background: hsl(228, 14%, 18%);
+    border-color: hsl(228, 14%, 30%);
+    transform: translateY(-1px);
 }
 
+.btn-secondary:active {
+    transform: translateY(0);
+}
+
+/* ── Danger ───────────────────────────────────────────────────── */
 .btn-danger {
-  background: linear-gradient(135deg, var(--color-danger), hsl(340, 70%, 60%));
-  color: #fff;
-  box-shadow: 0 4px 12px hsl(0, 70%, 60%, 0.2);
+    background: linear-gradient(135deg, var(--color-danger), hsl(340, 70%, 60%));
+    color: #fff;
+    box-shadow: 0 4px 16px hsl(0, 70%, 60%, 0.22);
 }
 
 .btn-danger:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 6px 20px hsl(0, 70%, 60%, 0.3);
-  filter: brightness(1.1);
+    transform: translateY(-1px);
+    box-shadow: 0 8px 28px hsl(0, 70%, 60%, 0.35);
+    filter: brightness(1.08);
 }
 
+.btn-danger:active {
+    transform: translateY(0);
+}
+
+/* ── Ghost ────────────────────────────────────────────────────── */
 .btn-ghost {
-  background: transparent;
-  color: var(--color-text-secondary);
-  border: 1px solid transparent;
+    background: transparent;
+    color: var(--color-text-secondary);
+    border: 1px solid transparent;
+    min-height: var(--touch-target);
 }
 
 .btn-ghost:hover {
-  background: var(--color-bg-elevated);
-  color: var(--color-text-primary);
-  border-color: var(--color-border);
+    background: var(--color-bg-elevated);
+    color: var(--color-text-primary);
+    border-color: var(--color-border);
 }
 
+/* ── Sizes ────────────────────────────────────────────────────── */
 .btn-sm {
-  padding: var(--space-2) var(--space-3);
-  font-size: var(--text-xs);
+    padding: 0 var(--space-3);
+    font-size: var(--text-xs);
+    min-height: 34px;
 }
 
 .btn-lg {
-  padding: var(--space-4) var(--space-6);
-  font-size: var(--text-base);
+    padding: 0 var(--space-8);
+    font-size: var(--text-base);
+    min-height: 52px;
 }
 
 .btn-full { width: 100%; }
 
 .btn-icon {
-  padding: var(--space-2);
-  border-radius: var(--radius-md);
+    padding: var(--space-2);
+    min-height: var(--touch-target);
+    min-width: var(--touch-target);
+    border-radius: var(--radius-md);
+}
+
+/* ── Google Sign-In Button ────────────────────────────────────── */
+.btn-google {
+    background: hsl(228, 16%, 13%);
+    color: var(--color-text-primary);
+    border: 1px solid var(--color-border);
+    box-shadow: var(--shadow-sm);
+}
+
+.btn-google:hover {
+    background: hsl(228, 14%, 17%);
+    border-color: hsl(228, 14%, 28%);
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-md);
+}
+
+/* ── Spinner inside button ────────────────────────────────────── */
+.spinner {
+    display: inline-block;
+    width: 18px;
+    height: 18px;
+    border: 2px solid hsl(228, 14%, 28%);
+    border-top-color: currentColor;
+    border-radius: 50%;
+    animation: spin 700ms linear infinite;
+    flex-shrink: 0;
+}
+
+.spinner-sm {
+    width: 14px;
+    height: 14px;
+    border-width: 2px;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
 }

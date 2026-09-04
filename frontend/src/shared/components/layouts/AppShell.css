@@ -1,0 +1,57 @@
+/* ── App Shell ─────────────────────────────────────────────────── */
+.app-shell {
+    display: flex;
+    min-height: 100dvh;
+}
+
+/* ── Main content area (right of sidebar) ───────────────────────── */
+.main-content {
+    flex: 1;
+    margin-left: var(--sidebar-width);
+    min-height: 100dvh;
+    display: flex;
+    flex-direction: column;
+    /* Gentle transition when sidebar opens/closes on tablets */
+    transition: margin-left var(--transition-normal);
+}
+
+/* ── Page content (scrollable body below topbar) ─────────────────── */
+.page-content {
+    flex: 1;
+    padding: var(--space-8) var(--space-10);
+    /* Let the content breathe on very wide screens */
+    max-width: var(--content-max-width);
+    width: 100%;
+    /* Center content on ultra-wide monitors */
+    margin: 0 auto;
+}
+
+/* ── Tablet (≤ 1024px): tighten side padding ─────────────────────── */
+@media (max-width: 1024px) {
+    .page-content {
+        padding: var(--space-6) var(--space-8);
+    }
+}
+
+/* ── Mobile (≤ 768px): remove sidebar margin entirely ───────────── */
+/*
+ * The sidebar is hidden off-screen (translateX(-100%)) on mobile.
+ * Without this, main-content would still be indented 264px,
+ * pushing all content off the right edge of the viewport.
+ */
+@media (max-width: 768px) {
+    .main-content {
+        margin-left: 0;
+    }
+
+    .page-content {
+        padding: var(--space-5) var(--space-4);
+    }
+}
+
+/* ── Small phones (≤ 480px): minimal padding ─────────────────────── */
+@media (max-width: 480px) {
+    .page-content {
+        padding: var(--space-4) var(--space-3);
+    }
+}

@@ -1,54 +1,82 @@
+/* ── Form group ───────────────────────────────────────────────── */
 .form-group {
-  margin-bottom: var(--space-5);
+    margin-bottom: var(--space-5);
+}
+
+/* ── Label row (label + optional action link) ─────────────────── */
+.form-label-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: var(--space-2);
 }
 
 .form-label {
-  display: block;
-  font-size: var(--text-sm);
-  font-weight: var(--fw-medium);
-  color: var(--color-text-secondary);
-  margin-bottom: var(--space-2);
+    display: block;
+    font-size: var(--text-sm);
+    font-weight: var(--fw-medium);
+    color: var(--color-text-secondary);
+    letter-spacing: 0.01em;
 }
 
+/* ── Input (reused from input.css via shared rule) ────────────── */
 .form-input {
-  width: 100%;
-  padding: var(--space-3) var(--space-4);
-  background: hsl(228, 16%, 14%);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-md);
-  color: var(--color-text-primary);
-  font-family: var(--font-sans);
-  font-size: var(--text-sm);
-  transition: border-color var(--transition-fast), box-shadow var(--transition-fast), background var(--transition-fast);
-  outline: none;
+    width: 100%;
+    min-height: var(--touch-target);
+    padding: var(--space-3) var(--space-4);
+    background: hsl(228, 18%, 12%);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    color: var(--color-text-primary);
+    font-family: var(--font-sans);
+    font-size: var(--text-sm);
+    transition:
+        border-color var(--transition-fast),
+        box-shadow var(--transition-fast),
+        background var(--transition-fast);
+    outline: none;
+}
+
+.form-input:hover {
+    border-color: hsl(228, 14%, 28%);
 }
 
 .form-input:focus {
-  border-color: var(--color-border-focus);
-  background: hsl(228, 14%, 16%);
-  box-shadow: 0 0 0 3px var(--color-primary-glow);
+    border-color: var(--color-border-focus);
+    background: hsl(228, 16%, 14%);
+    box-shadow: 0 0 0 3px var(--color-primary-glow);
 }
 
 .form-input::placeholder {
-  color: var(--color-text-muted);
+    color: var(--color-text-muted);
 }
 
 .form-input.error {
-  border-color: var(--color-danger);
-  box-shadow: 0 0 0 3px hsl(0, 70%, 60%, 0.15);
+    border-color: var(--color-danger);
+    box-shadow: 0 0 0 3px hsla(0, 70%, 60%, 0.15);
 }
 
+/* ── Error message ────────────────────────────────────────────── */
 .form-error {
-  margin-top: var(--space-2);
-  font-size: var(--text-xs);
-  color: var(--color-danger);
-  display: flex;
-  align-items: center;
-  gap: var(--space-1);
+    margin-top: var(--space-2);
+    font-size: var(--text-xs);
+    color: var(--color-danger);
+    display: flex;
+    align-items: center;
+    gap: var(--space-1);
+    animation: errorShake 300ms ease;
 }
 
+@keyframes errorShake {
+    0%, 100% { transform: translateX(0); }
+    25%       { transform: translateX(-4px); }
+    75%       { transform: translateX(4px); }
+}
+
+/* ── Hint text ────────────────────────────────────────────────── */
 .form-hint {
-  margin-top: var(--space-2);
-  font-size: var(--text-xs);
-  color: var(--color-text-muted);
+    margin-top: var(--space-2);
+    font-size: var(--text-xs);
+    color: var(--color-text-muted);
+    line-height: 1.5;
 }

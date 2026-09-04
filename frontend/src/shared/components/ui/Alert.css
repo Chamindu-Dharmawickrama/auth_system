@@ -1,3 +1,4 @@
+/* ── Alert ────────────────────────────────────────────────────── */
 .alert {
     padding: var(--space-4) var(--space-5);
     border-radius: var(--radius-md);
@@ -6,22 +7,36 @@
     align-items: flex-start;
     gap: var(--space-3);
     margin-bottom: var(--space-5);
+    line-height: 1.55;
+    animation: alertIn 250ms ease both;
 }
 
+@keyframes alertIn {
+    from { opacity: 0; transform: translateY(-6px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ── Variants ─────────────────────────────────────────────────── */
 .alert-error {
-    background: hsl(0, 70%, 60%, 0.1);
-    border: 1px solid hsl(0, 70%, 60%, 0.25);
+    background: hsla(0, 70%, 60%, 0.1);
+    border: 1px solid hsla(0, 70%, 60%, 0.25);
     color: hsl(0, 80%, 75%);
 }
 
 .alert-success {
-    background: hsl(150, 60%, 50%, 0.1);
-    border: 1px solid hsl(150, 60%, 50%, 0.25);
+    background: hsla(150, 60%, 50%, 0.1);
+    border: 1px solid hsla(150, 60%, 50%, 0.25);
     color: hsl(150, 70%, 70%);
 }
 
 .alert-warning {
-    background: hsl(38, 90%, 60%, 0.1);
-    border: 1px solid hsl(38, 90%, 60%, 0.25);
+    background: hsla(38, 90%, 60%, 0.1);
+    border: 1px solid hsla(38, 90%, 60%, 0.25);
     color: hsl(38, 90%, 70%);
+}
+
+.alert-info {
+    background: hsla(210, 70%, 60%, 0.1);
+    border: 1px solid hsla(210, 70%, 60%, 0.25);
+    color: hsl(210, 80%, 75%);
 }

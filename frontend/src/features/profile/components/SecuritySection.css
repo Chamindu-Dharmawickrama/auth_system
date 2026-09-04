@@ -1,0 +1,58 @@
+/* ============================================================
+   SecuritySection.css
+   Styles for the SecuritySection component.
+   Uses design tokens from the global design system (index.css).
+   Note: .profile-section and .profile-section-title are defined
+   in ProfileInfoSection.css (shared across all sections).
+   ============================================================ */
+
+/* ── Session Row Panel ───────────────────────────────────────── */
+/*
+ * The active-session row is rendered with inline styles in the
+ * TSX file. This class provides a reusable alternative that
+ * maps to the same pattern used in SecuritySection.
+ */
+.session-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-6);
+  padding: var(--space-4) var(--space-5);
+  background: var(--color-bg-elevated);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  transition: border-color var(--transition-fast), background var(--transition-fast);
+}
+
+.session-row:hover {
+  background: hsl(228, 14%, 16%);
+  border-color: hsl(228, 14%, 26%);
+}
+
+/* ── Session Info (left side text block) ─────────────────────── */
+.session-row-info {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.session-row-title {
+  font-size: var(--text-sm);
+  font-weight: var(--fw-medium);
+  color: var(--color-text-primary);
+}
+
+.session-row-desc {
+  font-size: var(--text-sm);
+  color: var(--color-text-secondary);
+  line-height: 1.5;
+}
+
+/* ── Responsive ───────────────────────────────────────────────── */
+@media (max-width: 600px) {
+  .session-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-4);
+  }
+}

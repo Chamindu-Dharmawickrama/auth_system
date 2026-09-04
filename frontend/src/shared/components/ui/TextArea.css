@@ -1,0 +1,56 @@
+/* ── Textarea ─────────────────────────────────────────────────── */
+.form-textarea {
+    width: 100%;
+    min-height: 160px;
+    padding: var(--space-3) var(--space-4);
+
+    color: var(--color-text-primary);
+    background: hsl(228, 18%, 12%);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+
+    font-family: var(--font-sans);
+    font-size: var(--text-sm);
+    line-height: 1.65;
+    resize: vertical;
+    outline: none;
+
+    transition:
+        border-color var(--transition-fast),
+        box-shadow var(--transition-fast),
+        background var(--transition-fast);
+}
+
+.form-textarea:hover {
+    border-color: hsl(228, 14%, 28%);
+}
+
+.form-textarea:focus {
+    background: hsl(228, 16%, 14%);
+    border-color: var(--color-border-focus);
+    box-shadow: 0 0 0 3px var(--color-primary-glow);
+}
+
+.form-textarea::placeholder {
+    color: var(--color-text-muted);
+}
+
+.form-textarea.error {
+    border-color: var(--color-danger);
+    box-shadow: 0 0 0 3px hsla(0, 70%, 60%, 0.15);
+}
+
+/* ── Character counter ────────────────────────────────────────── */
+.char-counter {
+    margin-top: var(--space-1);
+
+    color: var(--color-text-muted);
+    font-size: var(--text-xs);
+    text-align: right;
+    transition: color var(--transition-fast);
+}
+
+.char-counter.over {
+    color: var(--color-danger);
+    font-weight: var(--fw-semibold);
+}

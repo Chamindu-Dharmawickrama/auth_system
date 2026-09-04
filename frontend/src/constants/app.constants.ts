@@ -22,6 +22,12 @@ export const USER_ROLES = {
   ADMIN: 'ADMIN',
 } as const;
 
+// Note constraints (mirror backend Zod schema limits) 
+export const NOTE_CONSTRAINTS = {
+  TITLE_MAX: 255,
+  CONTENT_MAX: 10_000,
+} as const;
+
 export type UserRole = (typeof USER_ROLES)[keyof typeof USER_ROLES];
 
 // Auth providers 

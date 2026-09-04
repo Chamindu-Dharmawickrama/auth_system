@@ -1,0 +1,51 @@
+/* ============================================================
+   ProfilePage.css
+   Styles for the ProfilePage layout wrapper.
+   Uses design tokens from the global design system (index.css).
+   ============================================================ */
+
+/* ── Page Container ──────────────────────────────────────────── */
+.profile-page {
+    max-width: 860px;
+    margin: 0 auto;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    /* Entrance animation */
+    animation: profilePageIn 400ms ease both;
+}
+
+@keyframes profilePageIn {
+    from {
+        opacity: 0;
+        transform: translateY(12px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* ── Error / Loading Full-Page States ────────────────────────── */
+.profile-page-error {
+    margin: var(--space-6);
+}
+
+/* ── Responsive ───────────────────────────────────────────────── */
+@media (max-width: 900px) {
+    .profile-page {
+        max-width: 100%;
+    }
+}
+
+@media (max-width: 768px) {
+    .profile-page {
+        padding: 0 var(--space-2);
+    }
+}
+
+@media (max-width: 480px) {
+    .profile-page {
+        padding: 0;
+    }
+}

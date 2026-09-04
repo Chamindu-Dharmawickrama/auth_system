@@ -1,0 +1,86 @@
+/* ============================================================
+   ProfileHeader.css
+   Styles for the ProfileHeader component.
+   Uses design tokens from the global design system (index.css).
+   ============================================================ */
+
+/* ── Profile Header Card ─────────────────────────────────────── */
+.profile-header {
+    display: flex;
+    align-items: center;
+    gap: var(--space-8);
+    padding: var(--space-8) var(--space-10);
+
+    background: var(--color-bg-card);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-xl);
+    margin-bottom: var(--space-6);
+    box-shadow: var(--shadow-md);
+    position: relative;
+    overflow: hidden;
+
+    transition: border-color var(--transition-normal), box-shadow var(--transition-normal);
+}
+
+/* Subtle gradient shimmer behind the card */
+.profile-header::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(
+        ellipse 60% 80% at 0% 50%,
+        hsla(250, 70%, 60%, 0.06),
+        transparent 70%
+    );
+    pointer-events: none;
+}
+
+.profile-header:hover {
+    border-color: hsl(228, 14%, 26%);
+    box-shadow: var(--shadow-lg);
+}
+
+/* ── Info Block (right of avatar) ────────────────────────────── */
+.profile-header-info {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+    flex: 1;
+    min-width: 0;
+}
+
+/* ── Username ─────────────────────────────────────────────────── */
+.profile-username {
+    font-size: var(--text-2xl);
+    font-weight: var(--fw-bold);
+    color: var(--color-text-primary);
+    line-height: 1.2;
+    letter-spacing: -0.02em;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* ── Responsive ───────────────────────────────────────────────── */
+@media (max-width: 640px) {
+    .profile-header {
+        flex-direction: column;
+        text-align: center;
+        padding: var(--space-8) var(--space-6);
+        gap: var(--space-5);
+    }
+
+    .profile-header-info {
+        align-items: center;
+    }
+
+    .profile-username {
+        font-size: var(--text-xl);
+    }
+}
+
+@media (max-width: 480px) {
+    .profile-header {
+        padding: var(--space-6) var(--space-5);
+    }
+}
