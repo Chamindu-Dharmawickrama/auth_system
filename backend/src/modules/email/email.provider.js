@@ -82,7 +82,7 @@ export const getEmailProvider = () => {
 //         await provider.send({
 //             to: "chamindudharmawickrema@gmail.com",
 //             subject: 'Test email',
-//             html: `<h1>Test email from Auth System ${new Date().toISOString()}</h1>`,
+//             html: `<h1>Test email from NoteVault ${new Date().toISOString()}</h1>`,
 //             text: 'This is a test email',
 //         });
 

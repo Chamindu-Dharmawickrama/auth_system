@@ -21,7 +21,7 @@ const baseHtml = (title, bodyHtml) => `<!DOCTYPE html>
             <td style="background:linear-gradient(135deg,#1a1a2e 0%,#16213e 100%);
                         padding:32px 40px;text-align:center;">
               <span style="color:#ffffff;font-size:22px;font-weight:700;
-                           letter-spacing:0.5px;">Auth System</span>
+                           letter-spacing:0.5px;">NoteVault</span>
             </td>
           </tr>
           <!-- Body -->
@@ -58,7 +58,7 @@ const registrationConfirmationTemplate = {
   }),
 
   render({ username, email }) {
-    const subject = 'Welcome to Auth System — your account is ready';
+    const subject = 'Welcome to NoteVault — your account is ready';
 
     const bodyHtml = `
           <h1 style="margin:0 0 8px;color:#1a1a2e;font-size:24px;font-weight:700;">
@@ -92,7 +92,7 @@ const registrationConfirmationTemplate = {
         `;
 
     const text = [
-      `Welcome to Auth System, ${username}!`,
+      `Welcome to NoteVault, ${username}!`,
       '',
       'Your account has been successfully created.',
       '',

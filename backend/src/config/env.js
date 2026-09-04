@@ -77,7 +77,7 @@ export const config = Object.freeze({
 
     emailProvider: process.env.EMAIL_PROVIDER ?? 'console',
     emailFromAddress: process.env.EMAIL_FROM_ADDRESS ?? 'noreply@example.com',
-    emailFromName: process.env.EMAIL_FROM_NAME ?? 'Auth System',
+    emailFromName: process.env.EMAIL_FROM_NAME ?? 'NoteVault',
 
     smtpHost: process.env.SMTP_HOST ?? '',
     smtpPort: parseInteger(process.env.SMTP_PORT, 587),
