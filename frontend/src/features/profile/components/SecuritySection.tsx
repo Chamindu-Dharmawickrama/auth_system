@@ -10,7 +10,7 @@ interface SecuritySectionProps {
 export function SecuritySection({ onLogoutAll, isLoggingOut }: SecuritySectionProps) {
   return (
     <section className="profile-section">
-      <h3 className="profile-section-title">Security Settings</h3>
+      <h3 className="profile-section-title" style={{ marginBottom: 'var(--space-6)' }}>Security Settings</h3>
       
       <div style={{ 
         display: 'flex', 

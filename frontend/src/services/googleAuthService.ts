@@ -68,13 +68,20 @@ export function loadGoogleScript(): Promise<void> {
       const existing = document.getElementById(GIS_SCRIPT_ID);
 
       if (existing) {
+         const TIMEOUT_MS = 10_000;
          const poll = setInterval(() => {
             if (window.google?.accounts) {
                clearInterval(poll);
+               clearTimeout(timeout);
                window.googleGsiLoaded = true;
                resolve();
             }
          }, 50);
+         const timeout = setTimeout(() => {
+            clearInterval(poll);
+            _loadPromise = null; // allow retry
+            reject(new Error("Timed out waiting for Google Identity Services to load."));
+         }, TIMEOUT_MS);
          return;
       }
 

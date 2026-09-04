@@ -17,13 +17,21 @@ interface ProfileInfoSectionProps {
 export function ProfileInfoSection({ profile, onUpdate, isUpdating }: ProfileInfoSectionProps) {
   const [isEditing, setIsEditing] = useState(false);
 
-  const { register, handleSubmit, formState: { errors } } = useForm<UpdateProfileFormData>({
+  const { register, handleSubmit, reset, formState: { errors } } = useForm<UpdateProfileFormData>({
     resolver: zodResolver(updateProfileSchema),
     defaultValues: {
       email: profile.email || '',
       avatarUrl: profile.avatarUrl || '',
     },
   });
+
+  const handleCancel = () => {
+    reset({
+      email: profile.email || '',
+      avatarUrl: profile.avatarUrl || '',
+    });
+    setIsEditing(false);
+  };
 
   const onSubmit = async (data: UpdateProfileFormData) => {
     // Convert empty strings to undefined for the API
@@ -75,7 +83,7 @@ export function ProfileInfoSection({ profile, onUpdate, isUpdating }: ProfileInf
 
             <div style={{ display: 'flex', gap: 'var(--space-3)', marginTop: 'var(--space-2)' }}>
               <Button type="submit" isLoading={isUpdating}>Save Changes</Button>
-              <Button type="button" variant="ghost" onClick={() => setIsEditing(false)} disabled={isUpdating}>Cancel</Button>
+              <Button type="button" variant="ghost" onClick={handleCancel} disabled={isUpdating}>Cancel</Button>
             </div>
           </div>
         </form>

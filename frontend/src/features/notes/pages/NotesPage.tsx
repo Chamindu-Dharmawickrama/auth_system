@@ -30,16 +30,18 @@ export function NotesPage({ adminView = false }: NotesPageProps) {
    const toast = useToast();
 
    // Fetch user's own notes only when NOT in admin view
-   const { data: allNotes = [], isLoading, isFetching } = useGetNotesQuery(
-      undefined,
-      { skip: adminView },
-   );
+   const {
+      data: allNotes = [],
+      isLoading,
+      isFetching,
+   } = useGetNotesQuery(undefined, { skip: adminView });
 
    // Fetch all system notes only in admin view
-   const {
-      data: systemAllNotes = [],
-      isLoading: systemNotesIsLoading,
-   } = useGetAllNotesQuery(undefined, { skip: !adminView });
+   const { data: systemAllNotes = [], isLoading: systemNotesIsLoading } =
+      useGetAllNotesQuery(undefined, {
+         skip: !adminView,
+         refetchOnMountOrArgChange: true,
+      });
 
    const [createNote, { isLoading: isCreating }] = useCreateNoteMutation();
    const [updateNote, { isLoading: isUpdating }] = useUpdateNoteMutation();
@@ -53,8 +55,10 @@ export function NotesPage({ adminView = false }: NotesPageProps) {
       try {
          await createNote(data).unwrap();
          toast.success("Note created!");
+         modals.close();
       } catch {
          toast.error("Failed to create note");
+         throw new Error("Create failed"); // keep modal open
       }
    };
 
@@ -63,8 +67,10 @@ export function NotesPage({ adminView = false }: NotesPageProps) {
       try {
          await updateNote({ id: selectedNote.id, body: data }).unwrap();
          toast.success("Note updated!");
+         modals.close();
       } catch {
          toast.error("Failed to update note");
+         throw new Error("Update failed"); // keep modal open
       }
    };
 
@@ -86,15 +92,18 @@ export function NotesPage({ adminView = false }: NotesPageProps) {
       <>
          <div className="notes-page-header">
             <div className="notes-page-header-left">
-               <p className="notes-page-loading-hint">
+               {/* <p className="notes-page-loading-hint">
                   {isLoading || isFetching || systemNotesIsLoading
                      ? "Loading notes…"
                      : ""}
-               </p>
+               </p> */}
             </div>
 
             {!adminView && (
-               <Button onClick={modals.openCreate} leftIcon={<Plus size={16} />}>
+               <Button
+                  onClick={modals.openCreate}
+                  leftIcon={<Plus size={16} />}
+               >
                   New Note
                </Button>
             )}
@@ -150,7 +159,11 @@ export function NotesPage({ adminView = false }: NotesPageProps) {
                note={selectedNote}
                currentUserId={user?.id}
                isAdmin={isAdmin}
-               onEdit={canEdit ? () => modals.openEdit(selectedNote.id) : modals.close}
+               onEdit={
+                  canEdit
+                     ? () => modals.openEdit(selectedNote.id)
+                     : modals.close
+               }
                onDelete={() => modals.openDelete(selectedNote.id)}
             />
          )}

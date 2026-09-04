@@ -48,8 +48,10 @@ export function NoteFormModal({
 
   const onSubmit = async (data: NoteFormData) => {
     await onSave(data);
-    onClose();
+    // Note: onSave (handleCreate/handleUpdate in NotesPage) calls modals.close()
+    // on success and re-throws on failure — so this line is never reached on error.
   };
+
 
   return (
     <Modal

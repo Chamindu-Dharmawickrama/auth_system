@@ -11,6 +11,7 @@ import {
    type CredentialResponse,
 } from "@/services/googleAuthService";
 import { getErrorMessage } from "@/types/api.types";
+import { sanitizeRedirectPath } from "@/shared/utils/routeUtils";
 
 export function GoogleSignInButton() {
    const buttonRef = useRef<HTMLDivElement>(null);
@@ -23,9 +24,10 @@ export function GoogleSignInButton() {
    const [googleSignIn, { isLoading: isSigningIn, error: apiError }] =
       useGoogleSignInMutation();
 
-   const from =
-      (location.state as { from?: { pathname: string } })?.from?.pathname ||
-      ROUTES.DASHBOARD;
+   const from = sanitizeRedirectPath(
+      (location.state as { from?: { pathname: string } })?.from?.pathname,
+      ROUTES.DASHBOARD,
+   );
 
    // Handle the credential callback from GIS
    const handleCredential = async (response: CredentialResponse) => {
@@ -38,7 +40,12 @@ export function GoogleSignInButton() {
       }
    };
 
-   // load GIS script, int
+   // Keep a stable ref to the latest handleCredential so the GIS callback
+   // never captures a stale closure (BUG-2 fix).
+   const handleCredentialRef = useRef(handleCredential);
+   handleCredentialRef.current = handleCredential;
+
+   // load GIS script, init
    useEffect(() => {
       let cancelled = false;
 
@@ -47,7 +54,8 @@ export function GoogleSignInButton() {
             await loadGoogleScript();
             if (cancelled) return;
 
-            initializeGoogleSignIn(handleCredential);
+            // Wrap in a stable function that always calls the current ref
+            initializeGoogleSignIn((res) => handleCredentialRef.current(res));
 
             if (buttonRef.current && !cancelled) {
                renderGoogleButton(buttonRef.current);

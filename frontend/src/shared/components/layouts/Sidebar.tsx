@@ -1,11 +1,10 @@
-import { useState } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { FileText, User, LogOut, Shield, Notebook } from 'lucide-react';
-import { useAppDispatch, useAppSelector } from '@/app/hooks';
+import { useAppSelector } from '@/app/hooks';
 import { selectUser, selectIsAdmin } from '@/features/auth/slices/authSlice';
 import { useLogoutMutation } from '@/features/auth/api/authApi';
 import { Avatar } from '@/shared/components/ui/Avatar';
-import { ROUTES, USER_ROLES } from '@/constants/app.constants';
+import { ROUTES } from '@/constants/app.constants';
 import { useToast } from '@/shared/hooks/useToast';
 import './Sidebar.css'
 
@@ -15,7 +14,6 @@ interface SidebarProps {
 }
 
 export function Sidebar({ isOpen, onClose }: SidebarProps) {
-  const dispatch = useAppDispatch();
   const user = useAppSelector(selectUser);
   const isAdmin = useAppSelector(selectIsAdmin);
   const navigate = useNavigate();

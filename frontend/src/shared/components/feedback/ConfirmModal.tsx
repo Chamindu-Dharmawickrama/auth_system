@@ -12,6 +12,8 @@ interface ConfirmModalProps {
    confirmLabel?: string;
    danger?: boolean;
    isLoading?: boolean;
+   /** Disables the confirm button at the HTML level (not just visually) */
+   confirmDisabled?: boolean;
    /** Optional additional content, e.g. a confirmation input */
    children?: ReactNode;
 }
@@ -25,13 +27,14 @@ export function ConfirmModal({
    confirmLabel = "Confirm",
    danger = false,
    isLoading = false,
+   confirmDisabled = false,
    children,
 }: ConfirmModalProps) {
    return (
       <Modal
          isOpen={isOpen}
          onClose={onClose}
-         title=""
+         title={title}
          maxWidth={440}
          footer={
             <>
@@ -46,6 +49,7 @@ export function ConfirmModal({
                   variant={danger ? "danger" : "primary"}
                   onClick={onConfirm}
                   isLoading={isLoading}
+                  disabled={isLoading || confirmDisabled}
                   id="confirm-modal-confirm-btn"
                >
                   {confirmLabel}
@@ -53,15 +57,16 @@ export function ConfirmModal({
             </>
          }
       >
-         <div
-            style={{
-               display: "flex",
-               alignItems: "flex-start",
-               gap: "var(--space-4)",
-               marginBottom: message || children ? "var(--space-4)" : 0,
-            }}
-         >
-            {danger && (
+         {/* Danger icon — shown when title renders inside Modal header */}
+         {danger && (
+            <div
+               style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "var(--space-3)",
+                  marginBottom: message || children ? "var(--space-4)" : 0,
+               }}
+            >
                <div
                   style={{
                      width: 40,
@@ -77,18 +82,8 @@ export function ConfirmModal({
                >
                   <AlertTriangle size={20} color="var(--color-danger)" />
                </div>
-            )}
-            <h3
-               style={{
-                  fontSize: "var(--text-lg)",
-                  fontWeight: "var(--fw-semibold)",
-                  color: "var(--color-text-primary)",
-                  lineHeight: 1.4,
-               }}
-            >
-               {title}
-            </h3>
-         </div>
+            </div>
+         )}
          {message && (
             <p
                style={{

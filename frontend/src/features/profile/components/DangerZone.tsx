@@ -22,6 +22,8 @@ export function DangerZone({
    const canDelete = confirmText === username;
 
    const handleDelete = async () => {
+      // JS-level guard: never proceed if the confirmation text doesn't match
+      if (!canDelete) return;
       await onDeleteAccount();
       setIsModalOpen(false);
    };
@@ -74,12 +76,16 @@ export function DangerZone({
 
          <ConfirmModal
             isOpen={isModalOpen}
-            onClose={() => setIsModalOpen(false)}
+            onClose={() => {
+               setIsModalOpen(false);
+               setConfirmText("");
+            }}
             onConfirm={handleDelete}
             title="Delete Account"
             confirmLabel="I understand, delete my account"
             danger
             isLoading={isDeleting}
+            confirmDisabled={!canDelete}
          >
             <div style={{ marginTop: "var(--space-4)" }}>
                <p
@@ -124,14 +130,6 @@ export function DangerZone({
                   disabled={isDeleting}
                />
             </div>
-
-            {/* Hack to disable the confirm button if text doesn't match */}
-            <style>{`
-          #confirm-modal-confirm-btn {
-            opacity: ${canDelete ? 1 : 0.5};
-            pointer-events: ${canDelete ? "auto" : "none"};
-          }
-        `}</style>
          </ConfirmModal>
       </>
    );

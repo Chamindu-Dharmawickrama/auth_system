@@ -1,4 +1,4 @@
-import { useEffect, type ReactNode } from 'react';
+import { useEffect, useId, type ReactNode } from 'react';
 import { X } from 'lucide-react';
 import './Modal.css';
 
@@ -26,6 +26,8 @@ export function Modal({
   footer,
   maxWidth = 520,
 }: ModalProps) {
+  const titleId = useId();
+
   // Escape key handler
   useEffect(() => {
     if (!isOpen) return;
@@ -54,11 +56,11 @@ export function Modal({
       onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
       role="dialog"
       aria-modal="true"
-      aria-labelledby="modal-title"
+      aria-labelledby={titleId}
     >
       <div className="modal" style={{ maxWidth }}>
         <div className="modal-header">
-          <h2 className="modal-title" id="modal-title">{title}</h2>
+          <h2 className="modal-title" id={titleId}>{title}</h2>
           <button className="modal-close" onClick={onClose} aria-label="Close modal">
             <X size={16} />
           </button>

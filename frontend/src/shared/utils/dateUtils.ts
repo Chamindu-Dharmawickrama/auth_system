@@ -10,6 +10,8 @@ const DATE_FORMAT_LONG: Intl.DateTimeFormatOptions = {
   day: 'numeric',
 };
 
+const rtf = new Intl.RelativeTimeFormat('en', { numeric: 'auto' });
+
 /**
  * Formats an ISO date string as "Aug 28, 2026".
  * Returns an empty string for falsy input.
@@ -40,8 +42,6 @@ export function formatRelativeDate(dateStr: string | null | undefined): string {
   const diffMin = Math.round(diffSec / 60);
   const diffHour = Math.round(diffMin / 60);
   const diffDay = Math.round(diffHour / 24);
-
-  const rtf = new Intl.RelativeTimeFormat('en', { numeric: 'auto' });
 
   if (Math.abs(diffSec) < 60) return rtf.format(diffSec, 'seconds');
   if (Math.abs(diffMin) < 60) return rtf.format(diffMin, 'minutes');

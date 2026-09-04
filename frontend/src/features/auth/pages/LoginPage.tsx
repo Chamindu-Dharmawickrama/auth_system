@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { FormField, InputBox, Button, Alert } from "@/shared/components/ui";
+import { FormField, Input, Button, Alert } from "@/shared/components/ui";
 import { AuthLayout } from "../components/AuthLayout";
 import { GoogleSignInButton } from "../components/GoogleSignInButton";
 import { Link, useLocation, useNavigate } from "react-router-dom";
@@ -11,6 +11,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { loginSchema, type LoginFormData } from "../validation/auth.schemas";
 import { useLoginMutation } from "../api/authApi";
 import { getErrorMessage } from "@/types/api.types";
+import { sanitizeRedirectPath } from "@/shared/utils/routeUtils";
 
 export function LoginPage() {
    const navigate = useNavigate();
@@ -22,9 +23,10 @@ export function LoginPage() {
       useLoginMutation();
 
    const error = getErrorMessage(localError);
-   const from =
-      (location.state as { from?: { pathname: string } })?.from?.pathname ||
-      ROUTES.DASHBOARD;
+   const from = sanitizeRedirectPath(
+      (location.state as { from?: { pathname: string } })?.from?.pathname,
+      ROUTES.DASHBOARD,
+   );
 
    // useForm - used to handle form state, validation, and submission
    // resolver - used to validate the form input data against the loginSchema schema
@@ -69,7 +71,7 @@ export function LoginPage() {
                htmlFor="username"
                error={errors.username?.message}
             >
-               <InputBox
+               <Input
                   id="username"
                   placeholder="Enter your username"
                   autoComplete="username"
@@ -93,7 +95,7 @@ export function LoginPage() {
                   </Link>
                }
             >
-               <InputBox
+               <Input
                   id="password"
                   type={passwordVisibility.isVisible ? "text" : "password"}
                   placeholder="Enter your password"

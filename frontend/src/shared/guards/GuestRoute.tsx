@@ -7,6 +7,7 @@ import {
 import type { ReactNode } from "react";
 import { Navigate, useLocation } from "react-router-dom";
 import { Spinner } from "../components/ui/Spinner";
+import { sanitizeRedirectPath } from "@/shared/utils/routeUtils";
 
 interface GuestRouteProps {
    children: ReactNode;
@@ -26,7 +27,10 @@ export function GuestRoute({ children }: GuestRouteProps) {
    if (isAuthenticated) {
       // If they were trying to go somewhere else before being redirected to login, send them there.
       // Otherwise, send them to the dashboard.
-      const from = (location.state as any)?.from?.pathname || ROUTES.DASHBOARD;
+      const from = sanitizeRedirectPath(
+         (location.state as { from?: { pathname: string } })?.from?.pathname,
+         ROUTES.DASHBOARD,
+      );
       return <Navigate to={from} replace />;
    }
 

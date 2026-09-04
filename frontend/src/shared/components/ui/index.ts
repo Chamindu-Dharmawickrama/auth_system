@@ -4,7 +4,6 @@ export { Button } from "./Button";
 export type { ButtonVariant, ButtonSize } from "./Button";
 
 export { Input } from "./Input";
-export { default as InputBox } from "./InputBox";
 export { Textarea } from "./Textarea";
 export { FormField } from "./FormField";
 

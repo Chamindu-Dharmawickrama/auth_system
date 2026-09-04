@@ -11,7 +11,8 @@ import { ProfileHeader } from '../components/ProfileHeader';
 import { ProfileInfoSection } from '../components/ProfileInfoSection';
 import { SecuritySection } from '../components/SecuritySection';
 import { DangerZone } from '../components/DangerZone';
-import { Spinner, Alert } from '@/shared/components/ui';
+import { ProfileSkeleton } from '../components/ProfileSkeleton';
+import { Alert } from '@/shared/components/ui';
 import { useToast } from '@/shared/hooks/useToast';
 import { ROUTES } from '@/constants/app.constants';
 import './ProfilePage.css';
@@ -25,7 +26,7 @@ export function ProfilePage() {
   const [deleteAccount, { isLoading: isDeleting }] = useDeleteAccountMutation();
   const [logoutAll, { isLoading: isLoggingOut }] = useLogoutAllMutation();
 
-  if (isLoading) return <Spinner fullPage message="Loading profile…" />;
+  if (isLoading) return <ProfileSkeleton />;
   if (isError || !profile) {
     return (
       <Alert variant="error" className="m-6">

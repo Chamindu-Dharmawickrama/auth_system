@@ -61,10 +61,7 @@ export function NoteCard({
                   </span>
                )}
                <span className="note-date">
-                  <Clock
-                     size={11}
-                     style={{ display: "inline", marginRight: 3 }}
-                  />
+                  <Clock size={11} />
                   {formatDate(note.updatedAt)}
                </span>
             </div>

@@ -40,6 +40,13 @@
     box-shadow: var(--shadow-lg);
 }
 
+/* ── Avatar Size Override ─────────────────────────────────────── */
+.profile-header .avatar {
+    width: 80px !important;
+    height: 80px !important;
+    font-size: var(--text-5xl) !important;
+}
+
 /* ── Info Block (right of avatar) ────────────────────────────── */
 .profile-header-info {
     display: flex;

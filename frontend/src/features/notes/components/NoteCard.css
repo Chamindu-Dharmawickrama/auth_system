@@ -116,11 +116,18 @@
 
     color: var(--color-text-muted);
     font-size: var(--text-xs);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .note-date {
+    display: flex;
+    align-items: center;
+    gap: var(--space-1);
     color: var(--color-text-muted);
     font-size: var(--text-xs);
+    white-space: nowrap;
 }
 
 .note-actions {
